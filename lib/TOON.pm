@@ -94,25 +94,102 @@ Quoted strings use JSON-style escapes.
 
 =head2 new
 
+  my $toon = TOON->new(%opts);
+
+Creates and returns a new TOON object. Accepts the following optional
+named parameters:
+
+=over 4
+
+=item pretty
+
+Boolean. When true, output is formatted with newlines and indentation.
+Defaults to C<0>.
+
+=item canonical
+
+Boolean. When true, hash keys are sorted alphabetically in output.
+Defaults to C<0>.
+
+=item indent
+
+Integer. Number of spaces per indentation level when C<pretty> is
+enabled. Defaults to C<2>.
+
+=back
+
 =head2 encode
+
+  my $text = $toon->encode($data);
+
+Encodes the given Perl data structure into a TOON string and returns it.
 
 =head2 decode
 
+  my $data = $toon->decode($text);
+
+Parses the given TOON string and returns the corresponding Perl data
+structure. Throws a L<TOON::Error> exception if the input is invalid.
+
 =head2 pretty
+
+  $toon->pretty;        # enable pretty printing
+  $toon->pretty(1);     # enable pretty printing
+  $toon->pretty(0);     # disable pretty printing
+
+Enables or disables pretty-printed output. When called without an
+argument (or with a true argument), pretty printing is enabled.
+Returns the TOON object so that calls can be chained.
 
 =head2 canonical
 
+  $toon->canonical;     # enable canonical output
+  $toon->canonical(1);  # enable canonical output
+  $toon->canonical(0);  # disable canonical output
+
+Enables or disables canonical (sorted-key) output. Returns the TOON
+object so that calls can be chained.
+
 =head2 indent
+
+  $toon->indent(4);
+
+Sets the number of spaces used per indentation level when pretty
+printing is enabled. Returns the TOON object so that calls can be
+chained.
 
 =head1 FUNCTIONS
 
 =head2 encode_toon
 
+  use TOON qw(encode_toon);
+  my $text = encode_toon($data, %opts);
+
+Functional interface to encoding. Encodes the given Perl data structure
+into a TOON string and returns it. Accepts the same options as L</new>.
+
 =head2 decode_toon
+
+  use TOON qw(decode_toon);
+  my $data = decode_toon($text, %opts);
+
+Functional interface to decoding. Parses the given TOON string and
+returns the corresponding Perl data structure. Throws a L<TOON::Error>
+exception if the input is invalid. Accepts the same options as L</new>.
 
 =head2 to_toon
 
+  use TOON qw(to_toon);
+  my $text = to_toon($data, %opts);
+
+An alias for L</encode_toon>.
+
 =head2 from_toon
+
+  use TOON qw(from_toon);
+  my $data = from_toon($text, %opts);
+
+An alias for L</decode_toon>.
 
 =head1 AUTHOR
 
