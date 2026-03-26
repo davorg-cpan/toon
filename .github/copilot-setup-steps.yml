@@ -1,0 +1,8 @@
+steps:
+  - name: Set up Perl
+    uses: shogo82148/actions-setup-perl@v1
+    with:
+      perl-version: '5.40'
+
+  - name: Install CPAN dependencies
+    run: cpanm --installdeps .
