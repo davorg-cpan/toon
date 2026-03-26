@@ -114,4 +114,8 @@ Quoted strings use JSON-style escapes.
 
 =head2 from_toon
 
+=head1 AUTHOR
+
+Dave Cross <dave@perlhacks.com>
+
 =cut
