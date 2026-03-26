@@ -331,3 +331,82 @@ sub _line_and_column ($self, $text, $pos) {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+TOON::PP - Pure-Perl encoder/decoder for Token-Oriented Object Notation
+
+=head1 SYNOPSIS
+
+  use TOON::PP;
+
+  my $pp   = TOON::PP->new(pretty => 1, canonical => 1);
+  my $text = $pp->encode({ answer => 42 });
+  my $data = $pp->decode($text);
+
+=head1 DESCRIPTION
+
+TOON::PP is the pure-Perl backend used by L<TOON>. It implements a
+pragmatic TOON syntax that supports scalars (C<null>, C<true>,
+C<false>, numbers, and quoted strings), arrays (C<[ ... ]>), and
+objects (C<{ key: value }>). Bareword object keys may consist of the
+characters C<[A-Za-z_][A-Za-z0-9_\-]*>; all other keys must be
+quoted. Quoted strings use JSON-style escape sequences.
+
+In most cases you will want to use the L<TOON> front-end module rather
+than instantiating TOON::PP directly.
+
+=head1 METHODS
+
+=head2 new
+
+  my $pp = TOON::PP->new(%opts);
+
+Creates and returns a new TOON::PP encoder/decoder object. Accepts the
+following optional named parameters:
+
+=over 4
+
+=item pretty
+
+Boolean. When true, output is formatted with newlines and indentation.
+Defaults to C<0>.
+
+=item canonical
+
+Boolean. When true, hash keys are sorted alphabetically in output.
+Defaults to C<0>.
+
+=item indent
+
+Integer. Number of spaces per indentation level when C<pretty> is
+enabled. Defaults to C<2>.
+
+=back
+
+=head2 encode
+
+  my $text = $pp->encode($data);
+
+Encodes the given Perl data structure into a TOON string and returns
+it. Supported Perl types are: C<undef> (encoded as C<null>), plain
+scalars (encoded as numbers, booleans, or quoted strings), array
+references (encoded as TOON arrays), and hash references (encoded as
+TOON objects). Blessed references and unsupported reference types
+cause a L<TOON::Error> exception to be thrown.
+
+=head2 decode
+
+  my $data = $pp->decode($text);
+
+Parses the given TOON string and returns the corresponding Perl data
+structure. Throws a L<TOON::Error> exception if the input is not valid
+TOON.
+
+=head1 AUTHOR
+
+Dave Cross <dave@perlhacks.com>
+
+=cut
