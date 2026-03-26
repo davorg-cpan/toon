@@ -6,7 +6,7 @@ WriteMakefile(
   NAME         => 'TOON',
   VERSION_FROM => 'lib/TOON.pm',
   ABSTRACT     => 'Token-Oriented Object Notation for Perl',
-  AUTHOR       => 'OpenAI example code',
+  AUTHOR       => 'Dave Cross <dave@perlhacks.com>',
   EXE_FILES    => ['bin/toon_pp'],
   PREREQ_PM    => {
     'Exporter'    => 0,

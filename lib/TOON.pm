@@ -6,7 +6,7 @@ use feature 'signatures';
 use Exporter 'import';
 use TOON::PP ();
 
-our $VERSION   = '0.001';
+our $VERSION   = '0.0.1';
 our @EXPORT_OK = qw(
   encode_toon decode_toon
   to_toon from_toon
@@ -113,5 +113,9 @@ Quoted strings use JSON-style escapes.
 =head2 to_toon
 
 =head2 from_toon
+
+=head1 AUTHOR
+
+Dave Cross <dave@perlhacks.com>
 
 =cut
