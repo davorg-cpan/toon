@@ -4,6 +4,8 @@ use v5.40;
 use feature 'signatures';
 use overload '""' => 'as_string', fallback => 1;
 
+our $VERSION = '0.0.1';
+
 sub new ($class, %args) {
   return bless {
     message => $args{message} // 'Unknown TOON error',

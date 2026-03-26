@@ -6,7 +6,7 @@ use feature 'signatures';
 use Scalar::Util qw(looks_like_number blessed);
 use TOON::Error;
 
-our $VERSION = '0.001';
+our $VERSION = '0.0.1';
 
 sub new ($class, %opts) {
   return bless {
