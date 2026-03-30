@@ -36,3 +36,44 @@ Reads TOON from STDIN or files and writes normalised TOON to STDOUT.
 USAGE
   exit;
 }
+
+__END__
+
+=head1 NAME
+
+toon_pp - read and normalise TOON data
+
+=head1 SYNOPSIS
+
+  toon_pp [--pretty] [--canonical] [file ...]
+
+=head1 DESCRIPTION
+
+C<toon_pp> reads TOON (Token-Oriented Object Notation) from standard
+input or from one or more files named on the command line, parses it,
+and writes the normalised TOON representation to standard output.
+
+=head1 OPTIONS
+
+=over 4
+
+=item --pretty
+
+Format the output with newlines and indentation to make it easier to
+read. By default the output is compact.
+
+=item --canonical
+
+Sort object keys alphabetically in the output.
+
+=item --help
+
+Display a brief usage message and exit.
+
+=back
+
+=head1 AUTHOR
+
+Dave Cross <dave@perlhacks.com>
+
+=cut
