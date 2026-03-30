@@ -9,14 +9,21 @@ use TOON;
 my $pretty    = 0;
 my $canonical = 0;
 my $help      = 0;
+my $version   = 0;
 
 GetOptions(
   'pretty!'    => \$pretty,
   'canonical!' => \$canonical,
   'help!'      => \$help,
+  'version|v'  => \$version,
 ) or usage();
 
 usage() if $help;
+
+if ($version) {
+  say "toon_pp version $TOON::VERSION";
+  exit;
+}
 
 local $/;
 my $input = <>;
@@ -30,7 +37,7 @@ print $toon->encode($data), "\n";
 
 sub usage {
   print <<'USAGE';
-Usage: toon_pp [--pretty] [--canonical] [file ...]
+Usage: toon_pp [--pretty] [--canonical] [--version] [file ...]
 
 Reads TOON from STDIN or files and writes normalised TOON to STDOUT.
 USAGE
@@ -45,7 +52,7 @@ toon_pp - read and normalise TOON data
 
 =head1 SYNOPSIS
 
-  toon_pp [--pretty] [--canonical] [file ...]
+  toon_pp [--pretty] [--canonical] [--version] [file ...]
 
 =head1 DESCRIPTION
 
@@ -69,6 +76,12 @@ Sort object keys alphabetically in the output.
 =item --help
 
 Display a brief usage message and exit.
+
+=item --version
+
+=item -v
+
+Display the version number and exit.
 
 =back
 
