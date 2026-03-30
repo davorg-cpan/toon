@@ -148,6 +148,10 @@ sub _parse_value ($self, $state) {
     return $self->_parse_number($state);
   }
 
+  if ($ch =~ /[A-Za-z_]/) {
+    return $self->_parse_tabular($state);
+  }
+
   $self->_throw($state, "Unexpected character '$ch'");
 }
 
@@ -210,6 +214,103 @@ sub _parse_array ($self, $state) {
   $self->_skip_ws($state);
   $self->_expect($state, ']');
   return \@array;
+}
+
+sub _parse_tabular ($self, $state) {
+  my %result;
+
+  while ($state->{pos} < $state->{len}) {
+    # Skip blank lines and leading whitespace between sections
+    $self->_skip_ws($state);
+    last if $state->{pos} >= $state->{len};
+
+    my $ch = $self->_peek($state);
+    last unless defined $ch && $ch =~ /[A-Za-z_]/;
+
+    # Parse key name
+    my $remaining = substr($state->{text}, $state->{pos});
+    $self->_throw($state, 'Expected identifier')
+      unless $remaining =~ /\A([A-Za-z_][A-Za-z0-9_-]*)/;
+    my $key = $1;
+    $state->{pos} += length $key;
+
+    # Parse [count]
+    $self->_expect($state, '[');
+    $remaining = substr($state->{text}, $state->{pos});
+    $self->_throw($state, 'Expected count in [...]')
+      unless $remaining =~ /\A([0-9]+)/;
+    my $count = int($1);
+    $state->{pos} += length $1;
+    $self->_expect($state, ']');
+
+    # Parse {field1,field2,...}
+    $self->_expect($state, '{');
+    my @fields;
+    while (1) {
+      $remaining = substr($state->{text}, $state->{pos});
+      $self->_throw($state, 'Expected field name')
+        unless $remaining =~ /\A([A-Za-z_][A-Za-z0-9_-]*)/;
+      push @fields, $1;
+      $state->{pos} += length $1;
+      my $c = $self->_peek($state);
+      if (defined $c && $c eq ',') {
+        $state->{pos}++;
+        next;
+      }
+      last;
+    }
+    $self->_expect($state, '}');
+
+    # Expect ':'
+    $self->_expect($state, ':');
+
+    # Parse count rows of comma-separated values
+    my @rows;
+    for (1 .. $count) {
+      # Skip to the start of the next line
+      while ($state->{pos} < $state->{len}) {
+        my $c = substr($state->{text}, $state->{pos}, 1);
+        $state->{pos}++;
+        last if $c eq "\n";
+      }
+
+      # Skip leading whitespace (indentation) on this data line
+      while ($state->{pos} < $state->{len}) {
+        my $c = substr($state->{text}, $state->{pos}, 1);
+        last unless $c eq ' ' || $c eq "\t";
+        $state->{pos}++;
+      }
+      # Parse comma-separated field values
+      my %row;
+      for my $fi (0 .. $#fields) {
+        if ($fi > 0) {
+          my $c = $self->_peek($state);
+          $self->_throw($state, 'Expected comma between row values')
+            unless defined $c && $c eq ',';
+          $state->{pos}++;
+        }
+        $row{$fields[$fi]} = $self->_parse_tabular_value($state);
+      }
+      push @rows, \%row;
+    }
+
+    $result{$key} = \@rows;
+  }
+
+  return \%result;
+}
+
+sub _parse_tabular_value ($self, $state) {
+  my $remaining = substr($state->{text}, $state->{pos});
+  $remaining =~ /\A([^,\n\r]*)/;
+  my $raw = $1;
+  $raw =~ s/\s+\z//;    # right-trim
+  $state->{pos} += length $1;
+
+  if ($raw =~ /\A-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\z/) {
+    return 0 + $raw;
+  }
+  return $raw;
 }
 
 sub _parse_key ($self, $state) {
