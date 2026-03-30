@@ -95,8 +95,67 @@ sub _encode_array ($self, $array, $level) {
     . "\n$pad]";
 }
 
+sub _is_tabular_encodable ($self, $hash) {
+  return 0 unless %$hash;
+
+  for my $key (keys %$hash) {
+    return 0 unless $key =~ /\A[A-Za-z_][A-Za-z0-9_-]*\z/;
+
+    my $val = $hash->{$key};
+    return 0 unless ref $val eq 'ARRAY' && @$val > 0;
+
+    my $first = $val->[0];
+    return 0 unless ref $first eq 'HASH' && %$first;
+
+    my @fields = sort keys %$first;
+    for my $f (@fields) {
+      return 0 unless $f =~ /\A[A-Za-z_][A-Za-z0-9_-]*\z/;
+    }
+
+    for my $row (@$val) {
+      return 0 unless ref $row eq 'HASH';
+      return 0 unless join(',', sort keys %$row) eq join(',', @fields);
+      for my $cell (values %$row) {
+        return 0 unless defined $cell;
+        return 0 if !looks_like_number($cell) && $cell =~ /[,\n\r]/;
+      }
+    }
+  }
+
+  return 1;
+}
+
+sub _encode_tabular ($self, $hash) {
+  my @keys = sort keys %$hash;
+
+  my @sections;
+  for my $key (@keys) {
+    my $arr    = $hash->{$key};
+    my $count  = scalar @$arr;
+    my @fields = sort keys %{ $arr->[0] };
+
+    my $section = "$key\[$count\]{" . join(',', @fields) . "}:\n";
+    for my $row (@$arr) {
+      $section .= '  ' . join(',', map { $self->_encode_tabular_value($row->{$_}) } @fields) . "\n";
+    }
+    push @sections, $section;
+  }
+
+  return join('', @sections);
+}
+
+sub _encode_tabular_value ($self, $value) {
+  return '' unless defined $value;
+  return 0 + $value if looks_like_number($value);
+  return "$value";
+}
+
 sub _encode_hash ($self, $hash, $level) {
   return '{}' unless %$hash;
+
+  if ($level == 0 && $self->_is_tabular_encodable($hash)) {
+    return $self->_encode_tabular($hash);
+  }
 
   my @keys = keys %$hash;
   @keys = sort @keys if $self->{canonical};
